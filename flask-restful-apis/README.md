@@ -108,6 +108,8 @@ $ curl http://127.0.0.1:5000/
 Hello, World!
 ```
 
+![hello_world_testing](./images/flask-restful-apis-hello-world-testing.png)
+
 ## Python modules
 
 Similar to Java packages and C# namespaces, [modules in Python](https://docs.python.org/3/tutorial/modules.html) are files organized in directories that other Python scripts can import. To create a module on a Python application, we need to create a folder and add an empty file called `__init__.py`
@@ -176,3 +178,56 @@ Now we can invoke the Hello World endpoint
 $ curl http://127.0.0.1:5000/
 Hello, World!
 ```
+
+We can create another shell script to stop all processes are running on port 5000
+```sh
+# create the file
+touch shutdown.sh
+
+# make it executable
+chmod +x shutdown.sh
+```
+
+#  Creating a RESTful Endpoint with Flask
+
+The goal of our application is to help users to manage `incomes` and `expenses`. We will begin by defining two endpoints to handle `incomes`. Let's replace the contents of the `./cashman/index.py` file with the following:
+```python
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+
+incomes = [
+    { 'description': 'salary', 'amount': 5000 }
+]
+
+
+@app.route('/incomes')
+def get_incomes():
+    return jsonify(incomes)
+
+
+@app.route('/incomes', methods=['POST'])
+def add_income():
+    incomes.append(request.get_json())
+    return '', 204
+```
+
+To interact with both endpoints that we have created, we can start our application and issue some HTTP requests:
+```sh
+# start the cashman application
+./bootstrap.sh &
+
+# get incomes
+curl http://localhost:5000/incomes
+
+# add new income
+curl -X POST -H "Content-Type: application/json" -d '{
+  "description": "lottery",
+  "amount": 1000.0
+}' http://localhost:5000/incomes
+
+# check if lottery was added
+curl localhost:5000/incomes
+```
+
+![incomes_testing](./images/flask-restful-apis-incomes-testing.png)
