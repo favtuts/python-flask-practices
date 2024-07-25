@@ -81,7 +81,7 @@ $ pipenv shell
 (flask-restful-apis) tvt@TVTLAP:~/flask-restful-apis$ 
 ```
 
-Create a file named `hello.py`, in the status bar of VS Code, you need to select right Python interpreter
+Create a file named [`hello.py`](./hello.py), in the status bar of VS Code, you need to select right Python interpreter
 
 ![select_interpreter](./images/flask-restful-apis-select-python-interpreter.png)
 
@@ -123,7 +123,7 @@ mkdir cashman && cd cashman
 touch __init__.py
 ```
 
-Inside the main module, let's create a script called `index.py`. In this script, we will define the first endpoint of our application.
+Inside the main module, let's create a script called [`index.py`](./cashman/index.py). In this script, we will define the first endpoint of our application.
 ```py
 from flask import Flask
 app = Flask(__name__)
@@ -134,7 +134,7 @@ def hello_world():
     return "Hello, World!"
 ```
 
-Let's create an executable file called `bootstrap.sh` in the root directory of our application.
+Let's create an executable file called [`bootstrap.sh`](./bootstrap.sh) in the root directory of our application.
 ```sh
 # move to the root directory
 cd ..
@@ -179,7 +179,7 @@ $ curl http://127.0.0.1:5000/
 Hello, World!
 ```
 
-We can create another shell script to stop all processes are running on port 5000
+We can create another shell script [shutdown.sh](./shutdown.sh) to stop all processes are running on port 5000
 ```sh
 # create the file
 touch shutdown.sh
@@ -190,7 +190,7 @@ chmod +x shutdown.sh
 
 #  Creating a RESTful Endpoint with Flask
 
-The goal of our application is to help users to manage `incomes` and `expenses`. We will begin by defining two endpoints to handle `incomes`. Let's replace the contents of the `./cashman/index.py` file with the following:
+The goal of our application is to help users to manage `incomes` and `expenses`. We will begin by defining two endpoints to handle `incomes`. Let's replace the contents of the [`./cashman/index.py`](./cashman/index.py) file with the following:
 ```python
 from flask import Flask, jsonify, request
 
@@ -231,3 +231,116 @@ curl localhost:5000/incomes
 ```
 
 ![incomes_testing](./images/flask-restful-apis-incomes-testing.png)
+
+# Mapping Models with Python Classes
+
+For more complex applications that deal with different entities and have multiple business rules and validations, we might need to encapsulate our data into [Python classes](https://docs.python.org/3/tutorial/classes.html).
+
+The first thing that we will do is create a `submodule` to hold all our entities. Let's create a `model` directory inside the `cashman` module and add an empty file called `__init__.py` on it.
+
+```sh
+# create model directory inside the cashman module
+mkdir -p cashman/model
+
+# initialize it as a module
+touch cashman/model/__init__.py
+```
+
+## Mapping a Python superclass
+
+We will create three classes in this new module/directory: `Transaction`, `Income`, and `Expense`. The first class will be the base for the two others, and we will call it `Transaction`. Let's create a file called [`transaction.py`](./cashman/model/transaction.py) in the `model` directory with the following code:
+```python
+import datetime as dt
+
+from marshmallow import Schema, fields
+
+
+class Transaction(object):
+    def __init__(self, description, amount, type):
+        self.description = description
+        self.amount = amount
+        self.created_at = dt.datetime.now()
+        self.type = type
+
+    def __repr__(self):
+        return '<Transaction(name={self.description!r})>'.format(self=self)
+
+
+class TransactionSchema(Schema):
+    description = fields.Str()
+    amount = fields.Number()
+    created_at = fields.Date()
+    type = fields.Str()
+```
+
+[Marshmallow is a popular Python package](https://marshmallow.readthedocs.io/en/latest/) for converting complex datatypes, such as objects, to and from built-in Python datatypes. We can use this package to validate, serialize, and deserialize data. we will use `marshmallow` to serialize and deserialize entities through our endpoints.
+
+```sh
+# installing marshmallow as a project dependency
+pipenv install marshmallow
+```
+
+Besides the `Transaction` class, we also defined a `TransactionSchema` which inherits from another superclass called `Schema`. We will use the latter to deserialize and serialize instances of `Transaction` from and to JSON objects.
+
+## Mapping Income and Expense as Python Classes
+
+We won't expose the `Transaction` class on our endpoints. We will create two specializations to handle the requests: `Income` and `Expense`. Let's make a file called [`income.py`](./cashman/model/income.py) inside the model module with the following code:
+
+```python
+from marshmallow import post_load
+
+from .transaction import Transaction, TransactionSchema
+from .transaction_type import TransactionType
+
+
+class Income(Transaction):
+    def __init__(self, description, amount):
+        super(Income, self).__init__(description, amount, TransactionType.INCOME)
+
+    def __repr__(self):
+        return '<Income(name={self.description!r})>'.format(self=self)
+
+
+class IncomeSchema(TransactionSchema):
+    @post_load
+    def make_income(self, data, **kwargs):
+        return Income(**data)
+```
+
+We have the type of transaction value been hardcoded into `INCOME`. This type is a [Python enumerator](https://docs.python.org/3/library/enum.html), which we still have to create, that will help us filter transactions in the future. Let's create another file, called [`transaction_type.py`](./cashman/model/transaction_type.py), inside model to represent this enumerator:
+
+```python
+from enum import Enum
+
+
+class TransactionType(Enum):
+    INCOME = "INCOME"
+    EXPENSE = "EXPENSE"
+```
+
+The code of the enumerator is quite simple. It just defines a class called `TransactionType` that inherits from `Enum` and that defines two types: `INCOME` and `EXPENSE`.
+
+Lastly, let's create the class that represents expenses. To do that, let's add a new file called [`expense.py`](./cashman/model/expense.py) inside `model` with the following code:
+
+```python
+from marshmallow import post_load
+
+from .transaction import Transaction, TransactionSchema
+from .transaction_type import TransactionType
+
+
+class Expense(Transaction):
+    def __init__(self, description, amount):
+        super(Expense, self).__init__(description, -abs(amount), TransactionType.EXPENSE)
+
+    def __repr__(self):
+        return '<Expense(name={self.description!r})>'.format(self=self)
+
+
+class ExpenseSchema(TransactionSchema):
+    @post_load
+    def make_expense(self, data, **kwargs):
+        return Expense(**data)
+```
+
+Similar to `Income`, this class hardcodes the type of the transaction, but now it passes `EXPENSE` to the superclass. The difference is that it transforms the given amount to be negative.
