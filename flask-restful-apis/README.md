@@ -426,3 +426,59 @@ curl -X POST -H "Content-Type: application/json" -d '{
     "description": "loan payment"
 }' http://localhost:5000/incomes
 ```
+
+# Dockerizing Flask Applications
+
+As we are planning to eventually release our API in the cloud, we are going to create a `Dockerfile` to describe what is needed to run the application on a Docker container.
+
+Defining a Docker recipe (`Dockerfile`) will help us run the API in different environments. That is, in the future, we will also install Docker and run our program on environments like `production` and `staging`.
+
+Let's create the `Dockerfile` in the root directory of our project with the following code:
+
+```sh
+# Using lightweight alpine image
+FROM python:3.8-alpine
+
+# Installing packages
+RUN apk update
+RUN pip install --no-cache-dir pipenv
+
+# Defining working directory and adding source code
+WORKDIR /usr/src/app
+COPY Pipfile Pipfile.lock bootstrap.sh ./
+COPY cashman ./cashman
+
+# Install API dependencies
+RUN pipenv install --system --deploy
+
+# Start app
+EXPOSE 5000
+ENTRYPOINT ["/usr/src/app/bootstrap.sh"]
+```
+
+Please make sure that the Python version in both `Dockerfile` and `Pipfile` are aligned, or the docker container won't be able to start the server.
+For our `Dockerfile`, we use Python version 3.8
+
+To create and run a Docker container based on the `Dockerfile` that we created, we can execute the following commands:
+
+```sh
+# build the image
+docker build -t cashman .
+
+# run a new docker container named cashman
+docker run --name cashman \
+    -d -p 5000:5000 \
+    cashman
+
+# fetch incomes from the dockerized instance
+curl http://localhost:5000/incomes
+
+# check logs on docker container
+docker ps
+docker logs 4a93b5cd7e83
+
+# stop the docker container
+docker stop 4a93b5cd7e83
+```
+
+The `Dockerfile` is simple but effective, and using it is similarly easy. With these commands and this `Dockerfile`, we can run as many instances of our API as we need with no trouble. It's just a matter of defining another port on the host or even another host.
