@@ -344,3 +344,85 @@ class ExpenseSchema(TransactionSchema):
 ```
 
 Similar to `Income`, this class hardcodes the type of the transaction, but now it passes `EXPENSE` to the superclass. The difference is that it transforms the given amount to be negative.
+
+# Serializing and Deserializing Objects with Marshmallow
+
+Let's replace [`./cashman/index.py`](./cashman/index.py) contents to:
+
+```python
+from flask import Flask, jsonify, request
+
+from cashman.model.expense import Expense, ExpenseSchema
+from cashman.model.income import Income, IncomeSchema
+from cashman.model.transaction_type import TransactionType
+
+app = Flask(__name__)
+
+transactions = [
+    Income('Salary', 5000),
+    Income('Dividends', 200),
+    Expense('pizza', 50),
+    Expense('Rock Concert', 100)
+]
+
+
+@app.route('/incomes')
+def get_incomes():
+    schema = IncomeSchema(many=True)
+    incomes = schema.dump(
+        filter(lambda t: t.type == TransactionType.INCOME, transactions)
+    )
+    return jsonify(incomes)
+
+
+@app.route('/incomes', methods=['POST'])
+def add_income():
+    income = IncomeSchema().load(request.get_json())
+    transactions.append(income)
+    return "", 204
+
+
+@app.route('/expenses')
+def get_expenses():
+    schema = ExpenseSchema(many=True)
+    expenses = schema.dump(
+        filter(lambda t: t.type == TransactionType.EXPENSE, transactions)
+    )
+    return jsonify(expenses)
+
+
+@app.route('/expenses', methods=['POST'])
+def add_expense():
+    expense = ExpenseSchema().load(request.get_json())
+    transactions.append(expense)
+    return "", 204
+
+
+if __name__ == "__main__":
+    app.run()
+```
+
+This finishes the implementation of our API. If we run our Flask application now, we will be able to interact with the endpoints, as shown here:
+
+```sh
+# start the application
+./bootstrap.sh
+
+# get expenses
+curl http://localhost:5000/expenses
+
+# add a new expense
+curl -X POST -H "Content-Type: application/json" -d '{
+    "amount": 20,
+    "description": "lottery ticket"
+}' http://localhost:5000/expenses
+
+# get incomes
+curl http://localhost:5000/incomes
+
+# add a new income
+curl -X POST -H "Content-Type: application/json" -d '{
+    "amount": 300.0,
+    "description": "loan payment"
+}' http://localhost:5000/incomes
+```
