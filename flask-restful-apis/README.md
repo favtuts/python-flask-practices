@@ -107,3 +107,72 @@ After executing these commands, we can reach our application by opening a browse
 $ curl http://127.0.0.1:5000/
 Hello, World!
 ```
+
+## Python modules
+
+Similar to Java packages and C# namespaces, [modules in Python](https://docs.python.org/3/tutorial/modules.html) are files organized in directories that other Python scripts can import. To create a module on a Python application, we need to create a folder and add an empty file called `__init__.py`
+
+Let's create our first main module on our application. Let's create the directory `cashman`. The root directory will hold metadata about our project, like dependencies.
+```sh
+# create source code's root
+mkdir cashman && cd cashman
+
+# create an empty __init__.py file
+touch __init__.py
+```
+
+Inside the main module, let's create a script called `index.py`. In this script, we will define the first endpoint of our application.
+```py
+from flask import Flask
+app = Flask(__name__)
+
+
+@app.route("/")
+def hello_world():
+    return "Hello, World!"
+```
+
+Let's create an executable file called `bootstrap.sh` in the root directory of our application.
+```sh
+# move to the root directory
+cd ..
+
+# create the file
+touch bootstrap.sh
+
+# make it executable
+chmod +x bootstrap.sh
+```
+
+The goal of this file is to facilitate the start-up of our application. Its source code will be the following:
+```sh
+#!/bin/sh
+# Defines the main script to be executed by Flask
+export FLASK_APP=./cashman/index.py
+# Runs our Flask app in the context of the virtual environment listening to all interfaces on the computer (-h 0.0.0.0)
+pipenv run flask --debug run -h 0.0.0.0
+```
+
+Note: we are setting flask to run in debug mode to enhance our development experience and activate the hot reload feature, so we don't have to restart the server each time we change the code.
+
+Run the script 
+```sh
+$ ./bootstrap.sh
+Courtesy Notice: Pipenv found itself running within a virtual environment, so it will automatically use that environment, instead of creating its own for any project. You can set PIPENV_IGNORE_VIRTUALENVS=1 to force pipenv to ignore that environment and create its own instead. You can set PIPENV_VERBOSITY=-1 to suppress this warning.
+ * Serving Flask app './cashman/index.py'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.29.248.234:5000
+Press CTRL+C to quit
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 226-427-834
+```
+
+Now we can invoke the Hello World endpoint
+```sh
+$ curl http://127.0.0.1:5000/
+Hello, World!
+```
