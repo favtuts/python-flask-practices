@@ -73,3 +73,37 @@ Then install Flask app
 # install flask a dependency on our project
 $ pipenv install flask
 ```
+
+Activate the environment
+```sh
+$ pipenv shell
+. /home/tvt/.local/share/virtualenvs/flask-restful-apis-vUa4VgeR/bin/activate
+(flask-restful-apis) tvt@TVTLAP:~/flask-restful-apis$ 
+```
+
+Create a file named `hello.py`, in the status bar of VS Code, you need to select right Python interpreter
+
+![select_interpreter](./images/flask-restful-apis-select-python-interpreter.png)
+
+Add 5 lines of code:
+```python
+# hello.py
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def hello_world():
+    return "Hello, World!"
+```
+
+To run it, we execute the following command:
+```sh
+$ flask --app hello run
+```
+
+After executing these commands, we can reach our application by opening a browser and navigating to `http://127.0.0.1:5000/` or by issuing `curl http://127.0.0.1:5000/`.
+```sh
+$ curl http://127.0.0.1:5000/
+Hello, World!
+```
