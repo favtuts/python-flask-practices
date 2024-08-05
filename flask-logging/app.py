@@ -24,13 +24,21 @@ dictConfig(
             },
             "size-rotate": {
                 "class": "logging.handlers.RotatingFileHandler",
-                "filename": "logs/flask-rotate.log",
+                "filename": "logs/flask-size-rotate.log",
                 "maxBytes": 1000000,
                 "backupCount": 5,
                 "formatter": "default",
             },
+            "time-rotate": {
+                "class": "logging.handlers.TimedRotatingFileHandler",
+                "filename": "logs/flask-time-rotate.log",
+                "when": "D",
+                "interval": 10,
+                "backupCount": 5,
+                "formatter": "default",
+            },
         },
-        "root": {"level": "DEBUG", "handlers": ["console", "file", "size-rotate"]},
+        "root": {"level": "DEBUG", "handlers": ["console", "file", "size-rotate", "time-rotate"]},
     }
 )
 

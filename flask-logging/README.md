@@ -240,6 +240,7 @@ $ cat flask.log
 
 To rotate your log files, you can use either `RotatingFileHandler` or `TimedRotatingFileHandler`.
 
+Example, using `RotatingFileHandler `:
 ```python
 . . .
 
@@ -257,6 +258,35 @@ dictConfig(
             },
         },
         "root": {"level": "DEBUG", "handlers": ["size-rotate"]},
+    }
+)
+. . .
+
+```
+
+Example using `TimedRotatingFileHandler `:
+
+```python
+. . .
+
+dictConfig(
+    {
+        "version": 1,
+        . . .
+        "handlers": {
+            "time-rotate": {
+                "class": "logging.handlers.TimedRotatingFileHandler",
+                "filename": "flask.log",
+                "when": "D",
+                "interval": 10,
+                "backupCount": 5,
+                "formatter": "default",
+            },
+        },
+        "root": {
+            "level": "DEBUG",
+            "handlers": ["time-rotate"],
+        },
     }
 )
 . . .

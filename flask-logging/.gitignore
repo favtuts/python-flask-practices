@@ -108,3 +108,8 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+
+#############
+flask.log
+logs/
