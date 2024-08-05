@@ -186,3 +186,52 @@ dictConfig(
 . . .
 
 ```
+
+# Logging to files
+
+Send log records to local files on the server
+```python
+. . .
+dictConfig(
+    {
+        "version": 1,
+        . . .
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "stream": "ext://sys.stdout",
+                "formatter": "default",
+            },
+            "file": {
+                "class": "logging.FileHandler",
+                "filename": "flask.log",
+                "formatter": "default",
+            },
+        },
+        "root": {"level": "DEBUG", "handlers": ["console", "file"]},
+    }
+)
+. . .
+@app.route("/")
+def hello():
+
+    app.logger.debug("A debug message")
+
+    return "Hello, World!"
+
+```
+
+You can view its contents:
+```sh
+$ cat flask.log
+
+[August 05, 2024 16:42:27 +07] INFO | _internal >>> WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:5000
+[August 05, 2024 16:42:27 +07] INFO | _internal >>> Press CTRL+C to quit
+[August 05, 2024 16:43:04 +07] DEBUG | app >>> A debug message
+[August 05, 2024 16:43:04 +07] INFO | app >>> An info message
+[August 05, 2024 16:43:04 +07] WARNING | app >>> A warning message
+[August 05, 2024 16:43:04 +07] ERROR | app >>> An error message
+[August 05, 2024 16:43:04 +07] CRITICAL | app >>> A critical message
+[August 05, 2024 16:43:04 +07] INFO | _internal >>> 127.0.0.1 - - [05/Aug/2024 16:43:04] "GET / HTTP/1.1" 200 -
+```

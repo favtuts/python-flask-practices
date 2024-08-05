@@ -16,9 +16,14 @@ dictConfig(
                 "class": "logging.StreamHandler",
                 "stream": "ext://sys.stdout",
                 "formatter": "default",
-            }
+            },
+            "file": {
+                "class": "logging.FileHandler",
+                "filename": "flask.log",
+                "formatter": "default",
+            },
         },
-        "root": {"level": "DEBUG", "handlers": ["console"]},
+        "root": {"level": "DEBUG", "handlers": ["console", "file"]},
     }
 )
 
