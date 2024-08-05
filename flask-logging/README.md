@@ -64,8 +64,8 @@ def warning():
 
 Try to run the Flask application
 ```sh
-$ flask run
- * Debug mode: off
+$ flask --debug run
+ * Debug mode: one
 WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
  * Running on http://127.0.0.1:5000
 Press CTRL+C to quit
@@ -77,3 +77,35 @@ $ curl http://127.0.0.1:5000/
 $ curl http://127.0.0.1:5000/info
 $ curl http://127.0.0.1:5000/warning
 ```
+
+
+Now add logging calls to the `info()` and `warning()` functions
+```python
+@app.route("/info")
+def info():
+    app.logger.info("Hello, World!")
+    return "Hello, World! (info)"
+
+
+@app.route("/warning")
+def warning():
+    app.logger.warning("A warning message.")
+    return "A warning message. (warning)"
+```
+
+Now test again:
+```sh
+$ curl http://127.0.0.1:5000/warning
+```
+
+You can see in the Terminal the log record with timestamp:
+```sh
+[2024-08-05 16:13:13,592] WARNING in app: A warning message.
+127.0.0.1 - - [05/Aug/2024 16:13:13] "GET /warning HTTP/1.1" 200 -
+```
+
+
+# Understanding logging level
+
+Flask offers six differentlog levels, each associated with an integer value: `CRITICAL`(50), `ERROR`(40), `WARNING`(30), `INFO`(20) and `DEBUG`(10).
+

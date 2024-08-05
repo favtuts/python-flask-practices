@@ -8,8 +8,10 @@ def hello():
 
 @app.route("/info")
 def info():
+    app.logger.info("Hello, World!")
     return "Hello, World! (info)"
 
 @app.route("/warning")
 def warning():
+    app.logger.warning("A warning message.")
     return "A warning message. (warning)"
