@@ -105,7 +105,38 @@ You can see in the Terminal the log record with timestamp:
 ```
 
 
-# Understanding logging level
+# Understanding log levels
 
 Flask offers six differentlog levels, each associated with an integer value: `CRITICAL`(50), `ERROR`(40), `WARNING`(30), `INFO`(20) and `DEBUG`(10).
 
+
+# Configuring your logging system
+
+Flask recommends that you use the `logging.config.dictConfig()` method to overwrite the default configurations
+```python
+from flask import Flask
+from logging.config import dictConfig
+
+dictConfig(
+    {
+        "version": 1,
+        "formatters": {
+            "default": {
+                "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
+            }
+        },
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "stream": "ext://sys.stdout",
+                "formatter": "default",
+            }
+        },
+        "root": {"level": "DEBUG", "handlers": ["console"]},
+    }
+)
+
+app = Flask(__name__)
+
+. . .
+```
