@@ -140,3 +140,49 @@ app = Flask(__name__)
 
 . . .
 ```
+
+# Formatting your log records
+
+```python
+. . .
+
+dictConfig(
+    {
+        "version": 1,
+        "formatters": {
+            "default": {
+                "format": "[%(asctime)s] %(levelname)s | %(module)s >>> %(message)s",
+            }
+        },
+        . . .
+    }
+)
+
+. . .
+
+@app.route("/")
+def hello():
+    app.logger.info("An info message")
+    return "Hello, World!"
+```
+
+You can customize how the timestamp is displayed by adding a `datefmt` key in the configurations:
+```python
+. . .
+
+dictConfig(
+    {
+        "version": 1,
+        "formatters": {
+            "default": {
+                "format": "[%(asctime)s] %(levelname)s | %(module)s >>> %(message)s",
+                "datefmt": "%B %d, %Y %H:%M:%S %Z",
+            }
+        },
+        . . .
+    }
+)
+
+. . .
+
+```
