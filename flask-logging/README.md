@@ -235,3 +235,30 @@ $ cat flask.log
 [August 05, 2024 16:43:04 +07] CRITICAL | app >>> A critical message
 [August 05, 2024 16:43:04 +07] INFO | _internal >>> 127.0.0.1 - - [05/Aug/2024 16:43:04] "GET / HTTP/1.1" 200 -
 ```
+
+# Rotating your log files
+
+To rotate your log files, you can use either `RotatingFileHandler` or `TimedRotatingFileHandler`.
+
+```python
+. . .
+
+dictConfig(
+    {
+        "version": 1,
+        . . .
+        "handlers": {
+            "size-rotate": {
+                "class": "logging.handlers.RotatingFileHandler",
+                "filename": "flask.log",
+                "maxBytes": 1000000,
+                "backupCount": 5,
+                "formatter": "default",
+            },
+        },
+        "root": {"level": "DEBUG", "handlers": ["size-rotate"]},
+    }
+)
+. . .
+
+```

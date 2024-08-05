@@ -22,8 +22,15 @@ dictConfig(
                 "filename": "flask.log",
                 "formatter": "default",
             },
+            "size-rotate": {
+                "class": "logging.handlers.RotatingFileHandler",
+                "filename": "logs/flask-rotate.log",
+                "maxBytes": 1000000,
+                "backupCount": 5,
+                "formatter": "default",
+            },
         },
-        "root": {"level": "DEBUG", "handlers": ["console", "file"]},
+        "root": {"level": "DEBUG", "handlers": ["console", "file", "size-rotate"]},
     }
 )
 
