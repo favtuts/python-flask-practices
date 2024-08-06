@@ -292,3 +292,64 @@ dictConfig(
 . . .
 
 ```
+
+# Logging HTTP requests
+
+Can use sessions to store the request_id, and for the sessions to be secure, you need to create a secret key for your application.
+```python
+from flask import session
+import uuid
+
+. . .
+
+app = Flask(__name__)
+
+app.secret_key = "<secret_key>"
+
+
+@app.route("/")
+def home():
+
+    session["ctx"] = {"request_id": str(uuid.uuid4())}
+
+    app.logger.info("A user visited the home page >>> %s", session["ctx"])
+
+    return render_template("home.html")
+
+```
+
+Beside the sessions, you can attach more object into the log:
+```python
+. . .
+    # Pass the search query to the Nominatim API to get a location
+    location = requests.get(
+        "https://nominatim.openstreetmap.org/search",
+        {"q": query, "format": "json", "limit": "1"},
+    ).json()
+
+    # If a location is found, pass the coordinate to the Time API to get the current time
+    if location:
+
+        app.logger.info(
+            "A location is found. | location: %s >>> %s", location, session["ctx"]
+        )
+```
+
+You can also log something about the response as well by using `@app.after_request` decorator:
+```python
+. . .
+@app.after_request
+def logAfterRequest(response):
+
+    app.logger.info(
+        "path: %s | method: %s | status: %s | size: %s >>> %s",
+        request.path,
+        request.method,
+        response.status,
+        response.content_length,
+        session["ctx"],
+    )
+
+    return response
+
+```

@@ -1,4 +1,5 @@
-from flask import Flask
+import uuid
+from flask import Flask, request, session
 from logging.config import dictConfig
 
 
@@ -44,8 +45,12 @@ dictConfig(
 
 app = Flask(__name__)
 
+app.secret_key = "c00de22a8b1e4daa2cabc8b3f82fdb753574293f8b673f9a"
+
 @app.route("/")
 def hello():
+    
+    session["ctx"] = {"request_id": str(uuid.uuid4())}
     
     app.logger.debug("A debug message")
     app.logger.info("An info message")
@@ -53,14 +58,35 @@ def hello():
     app.logger.error("An error message")
     app.logger.critical("A critical message")
     
+    app.logger.info("A user visisted the home page >>> %s", session["ctx"])
+    
     return "Hello, World!"
 
 @app.route("/info")
 def info():
-    app.logger.info("Hello, World!")
+    
+    session["ctx"] = {"request_id": str(uuid.uuid4())}
+    
+    app.logger.info("Hello, World! >>> %s", session["ctx"])
     return "Hello, World! (info)"
 
 @app.route("/warning")
 def warning():
-    app.logger.warning("A warning message.")
+    
+    session["ctx"] = {"request_id": str(uuid.uuid4())}
+    
+    app.logger.warning("A warning message. >>> %s", session["ctx"])
     return "A warning message. (warning)"
+
+@app.after_request
+def logAfterRequest(response):
+    app.logger.info(
+        "path: %s | method: %s | status: %s | size: %s >>> %s",
+        request.path,
+        request.method,
+        response.status,
+        response.content_length,
+        session["ctx"],
+    )
+
+    return response
