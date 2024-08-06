@@ -353,3 +353,58 @@ def logAfterRequest(response):
     return response
 
 ```
+
+
+# Working with multiple loggers
+
+We can create more loggers than the `root` logger:
+```python
+from flask import Flask
+from logging.config import dictConfig
+import logging
+
+dictConfig(
+    {
+        "version": 1,
+        "formatters": {
+            . . .
+        },
+        "handlers": {
+            . . .
+        },
+        "root": {"level": "DEBUG", "handlers": ["console"]},
+
+        "loggers": {
+            "extra": {
+                "level": "INFO",
+                "handlers": ["time-rotate"],
+                "propagate": False,
+            }
+        },
+    }
+)
+
+root = logging.getLogger("root")
+extra = logging.getLogger("extra")
+
+app = Flask(__name__)
+
+
+@app.route("/")
+def hello():
+
+    root.debug("A debug message")
+    root.info("An info message")
+    root.warning("A warning message")
+    root.error("An error message")
+    root.critical("A critical message")
+
+    extra.debug("A debug message")
+    extra.info("An info message")
+    extra.warning("A warning message")
+    extra.error("An error message")
+    extra.critical("A critical message")
+
+    return "Hello, World!"
+
+```

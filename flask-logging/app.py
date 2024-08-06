@@ -1,4 +1,5 @@
 import uuid
+import logging
 from flask import Flask, request, session
 from logging.config import dictConfig
 
@@ -39,9 +40,20 @@ dictConfig(
                 "formatter": "default",
             },
         },
-        "root": {"level": "DEBUG", "handlers": ["console", "file", "size-rotate", "time-rotate"]},
+        "root": {"level": "DEBUG", "handlers": ["console", "file", "size-rotate"]},
+        
+        "loggers": {
+            "extra": {
+                "level": "INFO",
+                "handlers": ["time-rotate"],
+                "propagate": False,
+            }
+        },
     }
 )
+
+root = logging.getLogger("root")
+extra = logging.getLogger("extra")
 
 app = Flask(__name__)
 
@@ -52,13 +64,25 @@ def hello():
     
     session["ctx"] = {"request_id": str(uuid.uuid4())}
     
-    app.logger.debug("A debug message")
-    app.logger.info("An info message")
-    app.logger.warning("A warning message")
-    app.logger.error("An error message")
-    app.logger.critical("A critical message")
+    app.logger.debug("A debug message - from App.Logger")
+    app.logger.info("An info message - from App.Logger")
+    app.logger.warning("A warning message - from App.Logger")
+    app.logger.error("An error message - from App.Logger")
+    app.logger.critical("A critical message - from App.Logger")
     
     app.logger.info("A user visisted the home page >>> %s", session["ctx"])
+        
+    root.debug("A debug message - from Root.Logger")
+    root.info("An info message - from Root.Logger")
+    root.warning("A warning message - Root App.Logger")
+    root.error("An error message - from Root.Logger")
+    root.critical("A critical message - from Root.Logger")
+    
+    extra.debug("A debug message - from Extra.Logger")
+    extra.info("An info message - from Extra.Logger")
+    extra.warning("A warning message - Extra App.Logger")
+    extra.error("An error message - from Extra.Logger")
+    extra.critical("A critical message - from Extra.Logger")
     
     return "Hello, World!"
 
