@@ -6,6 +6,11 @@ A world clock application built to demonstrate logging in Flask.
 
 ![Flask World Clock](screenshot.png)
 
+
+Typing "Ha noi" and click on Submit button, you can see the Clock information
+
+![Ha noi Clock](world-clock-hanoi.png)
+
 ## 🟢 Prerequisites
 
 You must have the latest version of [Python 3](https://www.python.org) installed on your machine. This project is tested against Python 3.10.0.
