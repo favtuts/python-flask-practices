@@ -75,3 +75,57 @@ Open your browser and go to [http://127.0.0.1:5000](http://127.0.0.1:5000)
 ## ⚖ License
 
 The code used in this project and in the linked tutorial are licensed under the [Apache License, Version 2.0](LICENSE).
+
+
+# Creating a logging system
+
+Setting up the configurations:
+```python
+from logging.config import dictConfig
+
+dictConfig(
+    {
+        "version": 1,
+        "formatters": {
+            "default": {
+                "format": "[%(asctime)s] [%(levelname)s | %(module)s] %(message)s",
+                "datefmt": "%B %d, %Y %H:%M:%S %Z",
+            },
+        },
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "formatter": "default",
+            },
+            "file": {
+                "class": "logging.FileHandler",
+                "filename": "worldClock.log",
+                "formatter": "default",
+            },
+            "logtail": {
+                "class": "logtail.LogtailHandler",
+                "source_token": "qU73jvQjZrNFHimZo4miLdxF",
+                "formatter": "default",
+            },
+        },
+        "root": {"level": "DEBUG", "handlers": ["console", "file", "logtail"]},
+    }
+)
+
+
+app = Flask(__name__)
+
+app.secret_key = "<secret_key>"
+```
+
+Make sure you put the configurations before you declare the Flask application (`app = Flask(__name__)`). This example uses [sessions](https://flask.palletsprojects.com/en/2.2.x/api/?highlight=session#flask.session) to store the `request_id`, and for the sessions to be secure, you need to create a secret key for your application.
+
+```python
+@app.route("/")
+def home():
+
+    session["ctx"] = {"request_id": str(uuid.uuid4())}
+    ...
+    
+```
+
