@@ -1,6 +1,7 @@
 # Flask World Clock
 
 A world clock application built to demonstrate logging in Flask.
+* https://tuts.heomi.net/how-to-get-started-with-logging-in-flask/
 
 **Tutorial**: [How to Start Logging with Flask](https://tuts.heomi.net/how-to-get-started-with-logging-in-flask/).
 
